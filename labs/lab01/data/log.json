@@ -1,0 +1,68 @@
+[
+    {
+        "event": "login",
+        "user": "user_alpha",
+        "result": "success",
+        "timestamp": "2026-09-25 04:56:33",
+        "args": [
+            "user_alpha",
+            "Password12345"
+        ],
+        "kwargs": {}
+    },
+    {
+        "event": "login",
+        "user": "user_alpha",
+        "result": "failure",
+        "timestamp": "2026-09-25 04:56:33",
+        "args": [
+            "user_alpha",
+            "WrongPassword123"
+        ],
+        "kwargs": {}
+    },
+    {
+        "event": "login",
+        "user": "user_beta",
+        "result": "failure",
+        "timestamp": "2026-09-25 04:56:33",
+        "args": [
+            "user_beta",
+            "Short"
+        ],
+        "kwargs": {}
+    },
+    {
+        "event": "login",
+        "user": "user_alpha",
+        "result": "success",
+        "timestamp": "2026-09-25 05:01:24",
+        "args": [
+            "user_alpha",
+            "Password12345"
+        ],
+        "kwargs": {}
+    },
+    {
+        "event": "login",
+        "user": "user_alpha",
+        "result": "failure",
+        "timestamp": "2026-09-25 05:01:24",
+        "args": [
+            "user_alpha",
+            "WrongPassword123"
+        ],
+        "kwargs": {}
+    },
+    {
+        "event": "login",
+        "user": "",
+        "result": "failure",
+        "timestamp": "2026-09-25 05:01:24",
+        "args": [
+            "",
+            "Password12345"
+        ],
+        "kwargs": {}
+    }
+]
