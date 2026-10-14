@@ -5,9 +5,7 @@ import json
 import os
 import sys
 
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from shared.student import GROUP_NAME, STUDENT_NAME, VARIANT_NUMBER
 
 print("------------")
@@ -16,7 +14,7 @@ print("------------")
 
 # Сіль з 5 символів з нулями зліва за варіантом
 SALT = f"{VARIANT_NUMBER:0>5}"
-
+MIN_LEN = 10
 
 class ValidationError(Exception):
     pass
@@ -27,7 +25,7 @@ def generate_hash(
 ) -> str:  # поверне рядок захешованого паролю
     if not password or not salt:
         raise ValueError("Пароль або сіль не можуть бути порожніми!")
-    elif len(password) < 10:
+    elif len(password) < MIN_LEN:
         raise ValidationError("Password is too short")
     # конкатенація(обєднання salt і пароля)
     # перетворюєм те що вийшло в байти бо hashlib працює онлі з ними
@@ -146,9 +144,7 @@ def log_event(func):
                 logs = []
                 if os.path.exists(file_path):
                     try:
-                        with open(
-                            file_path, mode="r", encoding="utf-8"
-                        ) as json_file:
+                        with open(file_path, mode="r", encoding="utf-8") as json_file:
                             logs = json.load(json_file)
                     except json.JSONDecodeError:
                         logs = []
@@ -167,8 +163,7 @@ def log_event(func):
 
 @log_event
 def login(
-    username: str, password: str
-) -> bool:  # перевірка на те чи є такий користувач чи ні
+    username: str, password: str) -> bool:  # перевірка на те чи є такий користувач чи ні
     # і чи правильний в нього захешований пароль
     if not username or not password:
         raise ValueError("Логін та пароль не можуть бути порожніми!")
@@ -187,27 +182,30 @@ def login(
     return False
 
 
-def main():
+def main3():
     print("Створення бази даних CSV")
     creates_user(users_to_register)
 
     print("\nТестування авторизації (Login)")
-    # Успішна спроба входу
-    try:
-        login("user_alpha", "Password12345")
-    except (ValueError, ValidationError) as e:
-        print(f"Помилка: {e}")
 
     try:
-        login("user_alpha", "WrongPassword123")
+        res = login("user_alpha", "Password12345")
+        if res:
+            print(" -> Успішний вхід")
     except (ValueError, ValidationError) as e:
-        print(f"Помилка: {e}")
+        print(f" -> Неуспішний вхід: {e}")
+
+    try:
+        res = login("user_alpha", "WrongPassword123")
+        if not res:
+            print(" -> Неуспішний вхід: Невірний пароль або користувач")
+    except (ValueError, ValidationError) as e:
+        print(f" -> Неуспішний вхід (виняток)")
 
     try:
         login("", "Password12345")
     except (ValueError, ValidationError) as e:
-        print(f"[ОЧІКУВАНА ПОМИЛКА] {e}")
-
+        print(f" -> Неуспішний вхід (перехоплено помилку): {e}")
 
 if __name__ == "__main__":
-    main()
+    main3()
