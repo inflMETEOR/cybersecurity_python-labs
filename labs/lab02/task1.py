@@ -12,6 +12,8 @@ from dataclasses import dataclass
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from shared.student import STUDENT_NAME, GROUP_NAME, VARIANT_NUMBER
 ITERATIONS = 100_000
+SESSION_TIMEOUT_SEC = 900
+ALLOWED_KEYS = ["user", "session", "audit_log"]
 
 class User:
     def __init__(self, username: str , email: str , role: str , active: bool, ):
@@ -98,7 +100,61 @@ class AuditLog:
         for log in self.logs:
             print(log)
 
+class UserAccount:
+    def __init__(self, user: User, session: Session | None = None, audit_log: AuditLog | None = None):
+        self.user = user
+        self.session = session
+        self.audit_log = audit_log if audit_log else AuditLog()
+    def login(self, username, password, ip):
+        if self.user.active and self.user.check_password(password) and username == self.user.username:
+            self.session = Session(ip=ip)
+            self.session.touch()
+            self.audit_log.add_log(username, "login_success")
+            return True
+        else:
+            self.audit_log.add_log(username, "login_failure")
+            return False
 
+    def is_authenticated(self):
+        if not self.session: return False
+        return self.session.is_active(SESSION_TIMEOUT_SEC)
+
+    def logout(self):
+        if self.session:
+            self.audit_log.add_log(self.user.username, "logout")
+            self.session = None
+    
+    def __getitem__(self, key):
+        if key not in ALLOWED_KEYS:
+            raise KeyError(f"Ключ '{key}' недоступний або не існує")
+
+        if key == "user":
+            return self.user
+        if key == "session":
+            return self.session
+        if key == "audit_log":
+            return self.audit_log
+        
+    def __setitem__(self, key: str, value):
+        if key not in ALLOWED_KEYS:
+            raise KeyError(f"Ключ '{key}' недоступний або не існує")
+
+        if key == "user":
+            if not isinstance(value, User):
+                raise TypeError("Значення для 'user' має бути екземпляром класу User")
+            self.user = value
+        elif key == "session":
+            if value is not None and not isinstance(value, Session):
+                raise TypeError(
+                    "Значення для 'session' має бути екземпляром класу Session або None"
+                )
+            self.session = value
+        elif key == "audit_log":
+            if not isinstance(value, AuditLog):
+                raise TypeError(
+                    "Значення для 'audit_log' має бути екземпляром класу AuditLog"
+                )
+            self.audit_log = value        
 
         
 
