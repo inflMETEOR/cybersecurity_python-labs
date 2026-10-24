@@ -16,6 +16,7 @@ print("------------")
 SALT = f"{VARIANT_NUMBER:0>5}"
 MIN_LEN = 10
 
+
 class ValidationError(Exception):
     pass
 
@@ -163,7 +164,8 @@ def log_event(func):
 
 @log_event
 def login(
-    username: str, password: str) -> bool:  # перевірка на те чи є такий користувач чи ні
+    username: str, password: str
+) -> bool:  # перевірка на те чи є такий користувач чи ні
     # і чи правильний в нього захешований пароль
     if not username or not password:
         raise ValueError("Логін та пароль не можуть бути порожніми!")
@@ -206,6 +208,7 @@ def main3():
         login("", "Password12345")
     except (ValueError, ValidationError) as e:
         print(f" -> Неуспішний вхід (перехоплено помилку): {e}")
+
 
 if __name__ == "__main__":
     main3()

@@ -7,6 +7,7 @@ import argparse
 BASE_DIR = Path(__file__).resolve().parent
 FILE_PATH = BASE_DIR / "data" / "firewall_rules.json"
 
+
 def open_json_file(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -19,13 +20,17 @@ def open_json_file(file_path):
 
 def check_ip_address(address):
     patern = r"^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$"
-    check_ip = bool(re.fullmatch(patern, str(address))) # поверне булеве значення 
+    check_ip = bool(re.fullmatch(patern, str(address)))  # поверне булеве значення
     return check_ip
+
 
 def check_source(source):
     pattern = r"^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\/(?:3[0-2]|[12]?\d))?$"
-    check_source = bool(re.fullmatch(pattern, str(source))) #перетвор на рядок якщо ip, source пусті
+    check_source = bool(
+        re.fullmatch(pattern, str(source))
+    )  # перетвор на рядок якщо ip, source пусті
     return check_source
+
 
 def sort_rule(rules):
     valid_data = []
@@ -40,9 +45,10 @@ def sort_rule(rules):
 
     return valid_data, wrong_validation_number
 
+
 def find_odds(rules):
     default_dict = defaultdict(list)
-    for rule in rules: 
+    for rule in rules:
         source = rule.get("source")
         destination = rule.get("destination")
         port = rule.get("port")
@@ -51,6 +57,7 @@ def find_odds(rules):
         default_dict[key].append(rule)
 
     return default_dict
+
 
 def compared_odds(rules):
     new_list_without_odds = []
@@ -69,6 +76,7 @@ def compared_odds(rules):
 
     return new_list_without_odds, dublicat_rules, conflicting_rules
 
+
 def hight_risk_rules(the_one_list):
     hight_risk_rules_conteiner = []
     for the_one_rule in the_one_list:
@@ -80,22 +88,23 @@ def hight_risk_rules(the_one_list):
 
         if action == "ALLOW":
             reasons = []
-            
+
             if source in ["0.0.0.0/0", "ANY"]:
                 reasons.append("Unlimited exposure (Public Source)")
-                
+
             if port in ["ANY", "*"]:
                 reasons.append("All ports allowed (ANY port)")
-                
+
             if reasons:
                 risk_info = {
                     "rule_id": the_one_rule.get("id"),
                     "rule": the_one_rule,
-                    "reason": ", ".join(reasons)
+                    "reason": ", ".join(reasons),
                 }
                 hight_risk_rules_conteiner.append(risk_info)
 
     return hight_risk_rules_conteiner
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -131,6 +140,7 @@ def save_json_file(file_path, data):
     with open(path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, ensure_ascii=False)
 
+
 def print_audit_report(
     total_rules,
     invalid_count,
@@ -148,9 +158,7 @@ def print_audit_report(
     print(f"  • Невалідні IP / Маски (видалено): {invalid_count}")
     print(f"  • Дублікати (видалено повторки):  {dublicat_rules}")
     print(f"  • Конфліктні правила (відсіяно):  {conflicting_rules}")
-    print(
-        f"  -------------------------------------------------"
-    )
+    print(f"  -------------------------------------------------")
     print(f"  • Залишилось валідних правил:      {len(cleaned_rules)}")
 
     print("\n[ПОТЕНЦІЙНО НЕБЕЗПЕЧНІ ПРАВИЛА (HIGH-RISK)]")
@@ -174,7 +182,9 @@ if __name__ == "__main__":
     firewall_rules = open_json_file(FILE_PATH)
     valid_rules, invalid_count = sort_rule(firewall_rules)
     default_dict = find_odds(valid_rules)
-    new_list_without_odds, dublicat_rules, conflicting_rules = compared_odds(default_dict)
+    new_list_without_odds, dublicat_rules, conflicting_rules = compared_odds(
+        default_dict
+    )
     hight_risk_rules_conteiner = hight_risk_rules(new_list_without_odds)
     output_path = BASE_DIR / "data" / "cleaned_rules.json"
     save_json_file(output_path, new_list_without_odds)
@@ -186,4 +196,3 @@ if __name__ == "__main__":
         cleaned_rules=new_list_without_odds,
         high_risk_list=hight_risk_rules_conteiner,
     )
-            
